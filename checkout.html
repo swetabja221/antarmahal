@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Antarmahal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--cream:#f5f0e8;--bone:#ede6d6;--terracotta:#c4714a;--deep:#1a1410;--warm-brown:#6b4226;--gold:#b8955a;--muted:#8a7a6a;--white:#faf8f4;}
+body{background:var(--cream);color:var(--deep);font-family:'Raleway',sans-serif;font-weight:300;overflow-x:hidden;cursor:none;}
+.cursor{width:10px;height:10px;background:var(--terracotta);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;mix-blend-mode:multiply;}
+.cursor-ring{width:36px;height:36px;border:1px solid var(--terracotta);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transition:transform 0.4s ease,width 0.3s,height 0.3s;opacity:0.6;}
+.cursor-ring.hovered{width:56px;height:56px;opacity:0.3;}
+nav{position:fixed;top:0;width:100%;z-index:100;padding:22px 60px;display:flex;align-items:center;justify-content:space-between;background:rgba(245,240,232,0.97);backdrop-filter:blur(8px);border-bottom:1px solid rgba(26,20,16,0.08);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;letter-spacing:0.15em;color:var(--deep);text-decoration:none;}
+.nav-logo span{color:var(--terracotta);font-style:italic;}
+.steps{display:flex;align-items:center;gap:0;}
+.step{display:flex;align-items:center;gap:10px;font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);}
+.step.active{color:var(--deep);}
+.step.done{color:var(--terracotta);}
+.step-num{width:26px;height:26px;border-radius:50%;border:1px solid currentColor;display:flex;align-items:center;justify-content:center;font-size:0.7rem;flex-shrink:0;}
+.step.active .step-num{background:var(--deep);color:var(--white);border-color:var(--deep);}
+.step.done .step-num{background:var(--terracotta);color:var(--white);border-color:var(--terracotta);}
+.step-sep{width:40px;height:1px;background:rgba(26,20,16,0.15);margin:0 12px;}
+.secure-badge{font-size:0.62rem;letter-spacing:0.1em;color:var(--muted);display:flex;align-items:center;gap:6px;}
+.page-wrap{padding:110px 80px 80px;display:grid;grid-template-columns:1fr 400px;gap:50px;max-width:1300px;margin:0 auto;}
+/* FORM */
+.checkout-form{background:var(--white);padding:40px;}
+.form-section{margin-bottom:36px;}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;margin-bottom:24px;padding-bottom:14px;border-bottom:1px solid rgba(26,20,16,0.08);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.form-group{display:flex;flex-direction:column;gap:8px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:0.62rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--deep);}
+.form-input{padding:12px 16px;border:1px solid rgba(26,20,16,0.15);background:var(--cream);font-family:'Raleway',sans-serif;font-size:0.82rem;color:var(--deep);outline:none;transition:border-color 0.3s;}
+.form-input:focus{border-color:var(--terracotta);}
+.form-input::placeholder{color:var(--muted);}
+select.form-input{appearance:none;cursor:none;}
+.radio-group{display:flex;flex-direction:column;gap:12px;}
+.radio-option{display:flex;align-items:center;gap:14px;padding:16px;border:1px solid rgba(26,20,16,0.12);cursor:none;transition:border-color 0.3s;}
+.radio-option:hover{border-color:var(--terracotta);}
+.radio-option.selected{border-color:var(--deep);background:rgba(26,20,16,0.02);}
+.radio-option input{accent-color:var(--terracotta);cursor:none;}
+.radio-label{font-size:0.82rem;}
+.radio-desc{font-size:0.68rem;color:var(--muted);}
+.radio-price{margin-left:auto;font-size:0.82rem;color:var(--warm-brown);}
+/* PAYMENT */
+.payment-tabs{display:flex;gap:0;margin-bottom:20px;}
+.pay-tab{flex:1;padding:12px;border:1px solid rgba(26,20,16,0.12);background:none;font-family:'Raleway',sans-serif;font-size:0.65rem;letter-spacing:0.15em;text-transform:uppercase;cursor:none;transition:all 0.3s;color:var(--muted);}
+.pay-tab.active{background:var(--deep);color:var(--white);border-color:var(--deep);}
+.card-fields{display:grid;gap:14px;}
+/* ORDER SUMMARY */
+.order-summary{background:var(--white);padding:36px;position:sticky;top:90px;height:fit-content;}
+.summary-title{font-family:'Cormorant Garamond',serif;font-size:1.5rem;font-weight:300;margin-bottom:24px;}
+.order-item{display:flex;gap:14px;margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid rgba(26,20,16,0.06);}
+.order-item-img{width:64px;height:78px;object-fit:cover;filter:sepia(8%);flex-shrink:0;position:relative;}
+.order-item-qty{position:absolute;top:-8px;right:-8px;width:20px;height:20px;background:var(--muted);color:white;border-radius:50%;font-size:0.6rem;display:flex;align-items:center;justify-content:center;}
+.order-item-info{flex:1;}
+.order-item-name{font-size:0.82rem;color:var(--deep);margin-bottom:4px;line-height:1.3;}
+.order-item-meta{font-size:0.65rem;color:var(--muted);}
+.order-item-price{font-size:0.85rem;color:var(--warm-brown);white-space:nowrap;}
+.summary-rows{margin-top:4px;}
+.s-row{display:flex;justify-content:space-between;font-size:0.8rem;color:var(--muted);padding:7px 0;}
+.s-row.total{font-size:1rem;color:var(--deep);font-weight:500;border-top:1px solid rgba(26,20,16,0.1);margin-top:8px;padding-top:14px;}
+.s-row.total span:last-child{font-family:'Cormorant Garamond',serif;font-size:1.4rem;}
+.btn-place{width:100%;padding:18px;background:var(--terracotta);color:var(--white);border:none;font-family:'Raleway',sans-serif;font-size:0.72rem;letter-spacing:0.22em;text-transform:uppercase;cursor:none;margin-top:24px;transition:background 0.3s;}
+.btn-place:hover{background:var(--warm-brown);}
+.secure-note{text-align:center;font-size:0.62rem;color:var(--muted);margin-top:14px;letter-spacing:0.05em;}
+footer{background:var(--deep);color:var(--cream);padding:50px 80px 30px;}
+.footer-bottom{border-top:1px solid rgba(237,230,214,0.1);padding-top:22px;display:flex;justify-content:space-between;font-size:0.65rem;color:rgba(237,230,214,0.3);}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<nav>
+  <a href="index.html" class="nav-logo">Antar<span>mahal</span></a>
+  <div class="steps">
+    <div class="step done"><div class="step-num">✓</div> Cart</div>
+    <div class="step-sep"></div>
+    <div class="step active"><div class="step-num">2</div> Details</div>
+    <div class="step-sep"></div>
+    <div class="step"><div class="step-num">3</div> Payment</div>
+    <div class="step-sep"></div>
+    <div class="step"><div class="step-num">4</div> Confirm</div>
+  </div>
+  <div class="secure-badge">🔒 Secure Checkout</div>
+</nav>
+
+<div class="page-wrap">
+  <div class="checkout-form">
+    <!-- CONTACT -->
+    <div class="form-section">
+      <div class="section-title">Contact Information</div>
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Email Address</label><input class="form-input" type="email" placeholder="you@example.com"></div>
+        <div class="form-group"><label class="form-label">First Name</label><input class="form-input" type="text" placeholder="Priya"></div>
+        <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" type="text" placeholder="Sharma"></div>
+        <div class="form-group full"><label class="form-label">Phone Number</label><input class="form-input" type="tel" placeholder="+91 98765 43210"></div>
+      </div>
+    </div>
+    <!-- ADDRESS -->
+    <div class="form-section">
+      <div class="section-title">Shipping Address</div>
+      <div class="form-grid">
+        <div class="form-group full"><label class="form-label">Address Line 1</label><input class="form-input" type="text" placeholder="House / Flat / Block No."></div>
+        <div class="form-group full"><label class="form-label">Address Line 2 (Optional)</label><input class="form-input" type="text" placeholder="Street, Locality, Area"></div>
+        <div class="form-group"><label class="form-label">City</label><input class="form-input" type="text" placeholder="Kolkata"></div>
+        <div class="form-group"><label class="form-label">State</label><select class="form-input"><option>West Bengal</option><option>Delhi</option><option>Maharashtra</option><option>Tamil Nadu</option><option>Karnataka</option></select></div>
+        <div class="form-group"><label class="form-label">PIN Code</label><input class="form-input" type="text" placeholder="700001"></div>
+        <div class="form-group"><label class="form-label">Country</label><select class="form-input"><option>India</option><option>USA</option><option>UK</option></select></div>
+      </div>
+    </div>
+    <!-- SHIPPING -->
+    <div class="form-section">
+      <div class="section-title">Shipping Method</div>
+      <div class="radio-group">
+        <label class="radio-option selected" onclick="selectShipping(this)">
+          <input type="radio" name="ship" checked>
+          <div><div class="radio-label">Standard Delivery</div><div class="radio-desc">5–7 business days</div></div>
+          <span class="radio-price">Free</span>
+        </label>
+        <label class="radio-option" onclick="selectShipping(this)">
+          <input type="radio" name="ship">
+          <div><div class="radio-label">Express Delivery</div><div class="radio-desc">2–3 business days</div></div>
+          <span class="radio-price">₹299</span>
+        </label>
+        <label class="radio-option" onclick="selectShipping(this)">
+          <input type="radio" name="ship">
+          <div><div class="radio-label">Same Day (Kolkata only)</div><div class="radio-desc">Order before 12 PM</div></div>
+          <span class="radio-price">₹599</span>
+        </label>
+      </div>
+    </div>
+    <!-- PAYMENT -->
+    <div class="form-section">
+      <div class="section-title">Payment Method</div>
+      <div class="payment-tabs">
+        <button class="pay-tab active" onclick="selectPay(this)">Card</button>
+        <button class="pay-tab" onclick="selectPay(this)">UPI</button>
+        <button class="pay-tab" onclick="selectPay(this)">Net Banking</button>
+        <button class="pay-tab" onclick="selectPay(this)">COD</button>
+      </div>
+      <div class="card-fields">
+        <div class="form-group full"><label class="form-label">Card Number</label><input class="form-input" type="text" placeholder="1234  5678  9012  3456"></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label">Expiry</label><input class="form-input" type="text" placeholder="MM / YY"></div>
+          <div class="form-group"><label class="form-label">CVV</label><input class="form-input" type="text" placeholder="•••"></div>
+        </div>
+        <div class="form-group full"><label class="form-label">Name on Card</label><input class="form-input" type="text" placeholder="PRIYA SHARMA"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER SUMMARY -->
+  <div class="order-summary">
+    <div class="summary-title">Order Summary</div>
+    <div style="position:relative"><img class="order-item-img" src="https://images.unsplash.com/photo-1583391733956-6c78276477e1?w=200&q=80" alt="" style="width:64px;height:78px;object-fit:cover;margin-bottom:0"><span class="order-item-qty" style="position:absolute;top:-6px;left:50px">1</span></div>
+    <div style="margin-top:16px;">
+      <div class="order-item">
+        <div style="position:relative;flex-shrink:0"><img class="order-item-img" src="https://images.unsplash.com/photo-1583391733956-6c78276477e1?w=120&q=80" alt="" style="width:64px;height:78px;object-fit:cover;filter:sepia(8%)"><span style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--muted);color:white;border-radius:50%;font-size:0.6rem;display:flex;align-items:center;justify-content:center;">1</span></div>
+        <div class="order-item-info"><div class="order-item-name">Kantha Embroidered Silk Sari</div><div class="order-item-meta">S · Saffron Earth</div></div>
+        <div class="order-item-price">₹12,500</div>
+      </div>
+      <div class="order-item">
+        <div style="position:relative;flex-shrink:0"><img src="https://images.unsplash.com/photo-1559181567-c3190bfbf1a1?w=120&q=80" alt="" style="width:64px;height:78px;object-fit:cover;filter:sepia(8%)"><span style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--muted);color:white;border-radius:50%;font-size:0.6rem;display:flex;align-items:center;justify-content:center;">1</span></div>
+        <div class="order-item-info"><div class="order-item-name">Terracotta Goddess of Harvest</div><div class="order-item-meta">Natural Clay</div></div>
+        <div class="order-item-price">₹6,500</div>
+      </div>
+      <div class="order-item" style="border:none;margin:0;padding:0">
+        <div style="position:relative;flex-shrink:0"><img src="https://images.unsplash.com/photo-1551489186-cf8726f514f8?w=120&q=80" alt="" style="width:64px;height:78px;object-fit:cover;filter:sepia(8%)"><span style="position:absolute;top:-6px;right:-6px;width:20px;height:20px;background:var(--muted);color:white;border-radius:50%;font-size:0.6rem;display:flex;align-items:center;justify-content:center;">1</span></div>
+        <div class="order-item-info"><div class="order-item-name">Dhaka Muslin Pleated Kurta</div><div class="order-item-meta">M · Ivory</div></div>
+        <div class="order-item-price">₹4,800</div>
+      </div>
+    </div>
+    <div class="summary-rows">
+      <div class="s-row"><span>Subtotal</span><span>₹23,800</span></div>
+      <div class="s-row"><span>Shipping</span><span style="color:var(--terracotta)">Free</span></div>
+      <div class="s-row"><span>GST (18%)</span><span>₹4,284</span></div>
+      <div class="s-row total"><span>Total</span><span>₹28,084</span></div>
+    </div>
+    <button class="btn-place" onclick="location.href='confirmation.html'">Place Order →</button>
+    <p class="secure-note">🔒 Your payment info is encrypted & secure</p>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-bottom"><span>© 2025 Antarmahal. All rights reserved.</span><span>Privacy Policy · Terms of Service</span></div>
+</footer>
+
+<script>
+  const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.transform=`translate(${mx-5}px,${my-5}px)`;});
+  (function a(){rx+=(mx-rx-18)*0.12;ry+=(my-ry-18)*0.12;ring.style.transform=`translate(${rx}px,${ry}px)`;requestAnimationFrame(a);})();
+  document.querySelectorAll('a,button,input,select,label').forEach(el=>{el.addEventListener('mouseenter',()=>ring.classList.add('hovered'));el.addEventListener('mouseleave',()=>ring.classList.remove('hovered'));});
+  function selectShipping(el){document.querySelectorAll('.radio-option').forEach(r=>r.classList.remove('selected'));el.classList.add('selected');}
+  function selectPay(btn){document.querySelectorAll('.pay-tab').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
+</script>
+</body>
+</html>

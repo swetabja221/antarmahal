@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cart — Antarmahal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{--cream:#f5f0e8;--bone:#ede6d6;--terracotta:#c4714a;--deep:#1a1410;--warm-brown:#6b4226;--gold:#b8955a;--muted:#8a7a6a;--white:#faf8f4;}
+body{background:var(--cream);color:var(--deep);font-family:'Raleway',sans-serif;font-weight:300;overflow-x:hidden;cursor:none;}
+.cursor{width:10px;height:10px;background:var(--terracotta);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;mix-blend-mode:multiply;}
+.cursor-ring{width:36px;height:36px;border:1px solid var(--terracotta);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transition:transform 0.4s ease,width 0.3s,height 0.3s;opacity:0.6;}
+.cursor-ring.hovered{width:56px;height:56px;opacity:0.3;}
+nav{position:fixed;top:0;width:100%;z-index:100;padding:28px 60px;display:flex;align-items:center;justify-content:space-between;background:rgba(245,240,232,0.96);backdrop-filter:blur(8px);border-bottom:1px solid rgba(26,20,16,0.06);}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;letter-spacing:0.15em;color:var(--deep);text-decoration:none;}
+.nav-logo span{color:var(--terracotta);font-style:italic;}
+.nav-links{display:flex;gap:40px;list-style:none;}
+.nav-links a{font-size:0.72rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--deep);text-decoration:none;transition:color 0.3s;}
+.nav-links a:hover{color:var(--terracotta);}
+.nav-actions{display:flex;align-items:center;gap:24px;}
+.nav-icon{width:44px;height:44px;border:1px solid rgba(26,20,16,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:none;transition:all 0.3s;font-size:0.8rem;color:var(--deep);position:relative;text-decoration:none;}
+.nav-icon:hover{border-color:var(--terracotta);color:var(--terracotta);}
+.cart-count{background:var(--terracotta);color:white;font-size:0.6rem;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:absolute;top:-4px;right:-4px;}
+.page-wrap{padding:140px 80px 80px;max-width:1300px;margin:0 auto;}
+.page-title{font-family:'Cormorant Garamond',serif;font-size:3rem;font-weight:300;margin-bottom:8px;}
+.page-title em{font-style:italic;color:var(--terracotta);}
+.item-count{font-size:0.72rem;letter-spacing:0.15em;color:var(--muted);margin-bottom:50px;}
+.cart-layout{display:grid;grid-template-columns:1fr 360px;gap:50px;align-items:start;}
+.cart-items{background:var(--white);}
+.cart-header{display:grid;grid-template-columns:3fr 1fr 1fr 1fr;padding:16px 24px;border-bottom:1px solid rgba(26,20,16,0.08);font-size:0.6rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);}
+.cart-item{display:grid;grid-template-columns:3fr 1fr 1fr 1fr;align-items:center;padding:24px;border-bottom:1px solid rgba(26,20,16,0.06);gap:16px;animation:fadeUp 0.5s ease both;}
+.item-info{display:flex;gap:20px;align-items:center;}
+.item-img{width:90px;height:110px;object-fit:cover;filter:sepia(8%);}
+.item-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;margin-bottom:6px;line-height:1.3;}
+.item-name a{text-decoration:none;color:var(--deep);transition:color 0.3s;}
+.item-name a:hover{color:var(--terracotta);}
+.item-meta{font-size:0.65rem;color:var(--muted);letter-spacing:0.05em;margin-bottom:4px;}
+.item-remove{font-size:0.58rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);background:none;border:none;cursor:none;text-decoration:underline;margin-top:8px;font-family:'Raleway',sans-serif;transition:color 0.3s;}
+.item-remove:hover{color:var(--terracotta);}
+.item-price{font-size:0.9rem;color:var(--warm-brown);}
+.qty-wrap{display:flex;align-items:center;border:1px solid rgba(26,20,16,0.15);width:fit-content;}
+.qty-btn{width:34px;height:36px;background:none;border:none;font-size:1rem;cursor:none;transition:background 0.3s;color:var(--deep);}
+.qty-btn:hover{background:var(--bone);}
+.qty-num{width:40px;height:36px;border:none;border-left:1px solid rgba(26,20,16,0.15);border-right:1px solid rgba(26,20,16,0.15);text-align:center;font-family:'Raleway',sans-serif;font-size:0.82rem;background:none;color:var(--deep);}
+.item-subtotal{font-size:0.9rem;color:var(--deep);font-weight:500;}
+/* SUMMARY */
+.cart-summary{background:var(--white);padding:36px;position:sticky;top:110px;}
+.summary-title{font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid rgba(26,20,16,0.08);}
+.summary-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;font-size:0.82rem;color:var(--muted);}
+.summary-row.total{font-size:1rem;color:var(--deep);font-weight:500;padding-top:16px;border-top:1px solid rgba(26,20,16,0.08);margin-top:16px;}
+.summary-row.total span:last-child{font-family:'Cormorant Garamond',serif;font-size:1.4rem;}
+.coupon-wrap{display:flex;gap:8px;margin:24px 0;}
+.coupon-input{flex:1;padding:12px 16px;border:1px solid rgba(26,20,16,0.15);background:var(--cream);font-family:'Raleway',sans-serif;font-size:0.75rem;color:var(--deep);outline:none;}
+.coupon-input:focus{border-color:var(--terracotta);}
+.coupon-btn{padding:12px 18px;background:var(--deep);color:var(--white);border:none;font-family:'Raleway',sans-serif;font-size:0.62rem;letter-spacing:0.15em;text-transform:uppercase;cursor:none;transition:background 0.3s;}
+.coupon-btn:hover{background:var(--terracotta);}
+.btn-checkout{width:100%;padding:18px;background:var(--deep);color:var(--white);border:none;font-family:'Raleway',sans-serif;font-size:0.72rem;letter-spacing:0.22em;text-transform:uppercase;cursor:none;position:relative;overflow:hidden;margin-bottom:12px;transition:background 0.4s;}
+.btn-checkout::before{content:'';position:absolute;inset:0;background:var(--terracotta);transform:translateX(-101%);transition:transform 0.4s;}
+.btn-checkout:hover::before{transform:translateX(0);}
+.btn-checkout span{position:relative;z-index:1;}
+.btn-continue{width:100%;padding:14px;background:none;border:1px solid rgba(26,20,16,0.15);color:var(--deep);font-family:'Raleway',sans-serif;font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;cursor:none;transition:all 0.3s;text-decoration:none;display:block;text-align:center;}
+.btn-continue:hover{border-color:var(--deep);background:var(--bone);}
+.payment-icons{display:flex;gap:8px;justify-content:center;margin-top:20px;flex-wrap:wrap;}
+.pay-icon{padding:5px 10px;border:1px solid rgba(26,20,16,0.1);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;}
+footer{background:var(--deep);color:var(--cream);padding:60px 80px 32px;}
+.footer-bottom{border-top:1px solid rgba(237,230,214,0.1);padding-top:24px;display:flex;justify-content:space-between;font-size:0.65rem;color:rgba(237,230,214,0.3);}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:50px;margin-bottom:40px;}
+.footer-col h4{font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;}
+.footer-col ul{list-style:none;}
+.footer-col ul li{margin-bottom:9px;}
+.footer-col ul a{font-size:0.78rem;color:rgba(237,230,214,0.5);text-decoration:none;transition:color 0.3s;}
+.footer-col ul a:hover{color:var(--cream);}
+.footer-brand .nav-logo{color:var(--cream);margin-bottom:14px;display:block;}
+.footer-desc{font-size:0.78rem;line-height:1.8;color:rgba(237,230,214,0.45);max-width:240px;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<nav>
+  <a href="index.html" class="nav-logo">Antar<span>mahal</span></a>
+  <ul class="nav-links">
+    <li><a href="shop.html">Collections</a></li>
+    <li><a href="shop.html?cat=apparel">Apparel</a></li>
+    <li><a href="shop.html?cat=sculptures">Sculptures</a></li>
+    <li><a href="about.html">Our Story</a></li>
+  </ul>
+  <div class="nav-actions">
+    <div class="nav-icon">⌕</div>
+    <a href="wishlist.html" class="nav-icon">♡</a>
+    <a href="cart.html" class="nav-icon">✦<span class="cart-count">3</span></a>
+  </div>
+</nav>
+<div class="page-wrap">
+  <h1 class="page-title">Your <em>Cart</em></h1>
+  <p class="item-count">3 items in your cart</p>
+  <div class="cart-layout">
+    <div>
+      <div class="cart-items">
+        <div class="cart-header"><span>Product</span><span>Price</span><span>Qty</span><span>Subtotal</span></div>
+        <div class="cart-item" style="animation-delay:0s">
+          <div class="item-info">
+            <img class="item-img" src="https://images.unsplash.com/photo-1583391733956-6c78276477e1?w=200&q=80" alt="">
+            <div>
+              <div class="item-name"><a href="product.html">Kantha Embroidered Silk Sari</a></div>
+              <div class="item-meta">Size: S &nbsp;·&nbsp; Color: Saffron Earth</div>
+              <div class="item-meta">SKU: KSS-001</div>
+              <button class="item-remove" onclick="removeItem(this)">Remove</button>
+            </div>
+          </div>
+          <div class="item-price">₹12,500</div>
+          <div class="qty-wrap"><button class="qty-btn" onclick="changeQty(this,-1)">−</button><input class="qty-num" value="1" type="number"><button class="qty-btn" onclick="changeQty(this,1)">+</button></div>
+          <div class="item-subtotal">₹12,500</div>
+        </div>
+        <div class="cart-item" style="animation-delay:0.1s">
+          <div class="item-info">
+            <img class="item-img" src="https://images.unsplash.com/photo-1559181567-c3190bfbf1a1?w=200&q=80" alt="">
+            <div>
+              <div class="item-name"><a href="product.html">Terracotta Goddess of Harvest</a></div>
+              <div class="item-meta">Finish: Natural Clay</div>
+              <div class="item-meta">SKU: TGH-014</div>
+              <button class="item-remove" onclick="removeItem(this)">Remove</button>
+            </div>
+          </div>
+          <div class="item-price">₹6,500</div>
+          <div class="qty-wrap"><button class="qty-btn" onclick="changeQty(this,-1)">−</button><input class="qty-num" value="1" type="number"><button class="qty-btn" onclick="changeQty(this,1)">+</button></div>
+          <div class="item-subtotal">₹6,500</div>
+        </div>
+        <div class="cart-item" style="animation-delay:0.2s">
+          <div class="item-info">
+            <img class="item-img" src="https://images.unsplash.com/photo-1551489186-cf8726f514f8?w=200&q=80" alt="">
+            <div>
+              <div class="item-name"><a href="product.html">Dhaka Muslin Pleated Kurta</a></div>
+              <div class="item-meta">Size: M &nbsp;·&nbsp; Color: Ivory</div>
+              <div class="item-meta">SKU: DMK-007</div>
+              <button class="item-remove" onclick="removeItem(this)">Remove</button>
+            </div>
+          </div>
+          <div class="item-price">₹4,800</div>
+          <div class="qty-wrap"><button class="qty-btn" onclick="changeQty(this,-1)">−</button><input class="qty-num" value="1" type="number"><button class="qty-btn" onclick="changeQty(this,1)">+</button></div>
+          <div class="item-subtotal">₹4,800</div>
+        </div>
+      </div>
+    </div>
+    <div class="cart-summary">
+      <div class="summary-title">Order Summary</div>
+      <div class="summary-row"><span>Subtotal</span><span>₹23,800</span></div>
+      <div class="summary-row"><span>Shipping</span><span style="color:var(--terracotta)">Free</span></div>
+      <div class="summary-row"><span>Tax (18% GST)</span><span>₹4,284</span></div>
+      <div class="summary-row"><span>Discount</span><span style="color:var(--terracotta)">− ₹0</span></div>
+      <div class="summary-row total"><span>Total</span><span>₹28,084</span></div>
+      <div class="coupon-wrap">
+        <input class="coupon-input" type="text" placeholder="Coupon code">
+        <button class="coupon-btn">Apply</button>
+      </div>
+      <button class="btn-checkout" onclick="location.href='checkout.html'"><span>Proceed to Checkout</span></button>
+      <a href="shop.html" class="btn-continue">Continue Shopping</a>
+      <div class="payment-icons">
+        <span class="pay-icon">VISA</span>
+        <span class="pay-icon">MC</span>
+        <span class="pay-icon">UPI</span>
+        <span class="pay-icon">GPay</span>
+        <span class="pay-icon">Paytm</span>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand"><a href="index.html" class="nav-logo">Antar<span style="color:var(--terracotta);font-style:italic;">mahal</span></a><p class="footer-desc">Curating handcrafted apparel and sculptures from Bengal's artisan traditions.</p></div>
+    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html">All Collections</a></li><li><a href="shop.html?cat=apparel">Apparel</a></li><li><a href="shop.html?cat=sculptures">Sculptures</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    <div class="footer-col"><h4>Support</h4><ul><li><a href="#">Shipping</a></li><li><a href="#">Returns</a></li><li><a href="#">FAQ</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 Antarmahal.</span><span>Privacy · Terms</span></div>
+</footer>
+<script>
+  const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.transform=`translate(${mx-5}px,${my-5}px)`;});
+  (function a(){rx+=(mx-rx-18)*0.12;ry+=(my-ry-18)*0.12;ring.style.transform=`translate(${rx}px,${ry}px)`;requestAnimationFrame(a);})();
+  document.querySelectorAll('a,button').forEach(el=>{el.addEventListener('mouseenter',()=>ring.classList.add('hovered'));el.addEventListener('mouseleave',()=>ring.classList.remove('hovered'));});
+  function changeQty(btn,d){const inp=btn.parentElement.querySelector('.qty-num');inp.value=Math.max(1,+inp.value+d);}
+  function removeItem(btn){const item=btn.closest('.cart-item');item.style.opacity='0';item.style.transform='translateX(-20px)';item.style.transition='all 0.4s';setTimeout(()=>item.remove(),400);}
+</script>
+</body>
+</html>

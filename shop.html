@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop — Antarmahal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--cream:#f5f0e8;--bone:#ede6d6;--terracotta:#c4714a;--deep:#1a1410;--warm-brown:#6b4226;--gold:#b8955a;--muted:#8a7a6a;--white:#faf8f4;--border:rgba(26,20,16,0.12)}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--deep);font-family:'Raleway',sans-serif;font-weight:300;overflow-x:hidden;cursor:none}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9997;opacity:0.4}
+.cursor{width:10px;height:10px;background:var(--terracotta);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;mix-blend-mode:multiply}
+.cursor-ring{width:36px;height:36px;border:1px solid var(--terracotta);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transition:width 0.3s,height 0.3s,opacity 0.3s;opacity:0.6}
+.cursor-ring.hovered{width:56px;height:56px;opacity:0.3}
+
+nav{position:fixed;top:0;width:100%;z-index:100;padding:24px 60px;display:flex;align-items:center;justify-content:space-between;background:rgba(245,240,232,0.96);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'Cormorant Garamond',serif;font-size:1.7rem;font-weight:300;letter-spacing:0.15em;color:var(--deep);text-decoration:none}
+.nav-logo span{color:var(--terracotta);font-style:italic}
+.nav-links{display:flex;gap:36px;list-style:none}
+.nav-links a{font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--deep);text-decoration:none;position:relative;transition:color 0.3s}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:var(--terracotta);transition:width 0.3s ease}
+.nav-links a:hover,.nav-links a.active{color:var(--terracotta)}
+.nav-links a:hover::after,.nav-links a.active::after{width:100%}
+.nav-actions{display:flex;align-items:center;gap:16px}
+.nav-icon{width:40px;height:40px;border:1px solid var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:none;transition:all 0.3s;font-size:0.85rem;color:var(--deep);position:relative;text-decoration:none}
+.nav-icon:hover{border-color:var(--terracotta);color:var(--terracotta)}
+.cart-count{background:var(--terracotta);color:white;font-size:0.55rem;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center;position:absolute;top:-4px;right:-4px}
+
+/* PAGE HEADER */
+.page-header{padding:160px 80px 80px;background:var(--deep);color:var(--white);position:relative;overflow:hidden}
+.page-header::before{content:'';position:absolute;right:-100px;top:-100px;width:500px;height:500px;border-radius:50%;border:1px solid rgba(184,149,90,0.15)}
+.page-header::after{content:'';position:absolute;right:50px;top:50px;width:300px;height:300px;border-radius:50%;border:1px solid rgba(196,113,74,0.1)}
+.breadcrumb{font-size:0.6rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.breadcrumb a{color:rgba(250,248,244,0.5);text-decoration:none;transition:color 0.3s}
+.breadcrumb a:hover{color:var(--gold)}
+.page-header h1{font-family:'Cormorant Garamond',serif;font-size:clamp(2.5rem,5vw,4rem);font-weight:300;line-height:1.1}
+.page-header h1 em{font-style:italic;color:var(--terracotta)}
+.header-meta{display:flex;align-items:center;justify-content:space-between;margin-top:30px}
+.header-meta p{color:rgba(250,248,244,0.5);font-size:0.8rem}
+.header-tags{display:flex;gap:10px}
+.tag{font-size:0.58rem;letter-spacing:0.2em;text-transform:uppercase;padding:6px 16px;border:1px solid rgba(184,149,90,0.3);color:var(--gold);cursor:none;transition:all 0.3s}
+.tag.active,.tag:hover{background:var(--terracotta);border-color:var(--terracotta);color:var(--white)}
+
+/* SHOP LAYOUT */
+.shop-wrap{display:grid;grid-template-columns:260px 1fr;gap:0;min-height:80vh}
+
+/* SIDEBAR */
+.sidebar{padding:60px 40px;background:var(--white);border-right:1px solid var(--border);position:sticky;top:89px;height:calc(100vh - 89px);overflow-y:auto}
+.sidebar::-webkit-scrollbar{width:4px}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+.sidebar::-webkit-scrollbar-thumb{background:var(--bone)}
+.filter-group{margin-bottom:40px}
+.filter-label{font-size:0.58rem;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold);margin-bottom:18px;display:block}
+.filter-options{display:flex;flex-direction:column;gap:10px}
+.filter-option{display:flex;align-items:center;gap:10px;cursor:none;font-size:0.78rem;color:var(--muted);transition:color 0.3s}
+.filter-option:hover{color:var(--deep)}
+.filter-option input{accent-color:var(--terracotta);width:14px;height:14px;cursor:none}
+.filter-option input:checked + span{color:var(--deep);font-weight:500}
+.price-range{width:100%;height:2px;background:var(--bone);margin:16px 0;accent-color:var(--terracotta)}
+.price-vals{display:flex;justify-content:space-between;font-size:0.72rem;color:var(--muted)}
+.divider-line{height:1px;background:var(--border);margin:32px 0}
+.clear-btn{font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;color:var(--terracotta);background:none;border:none;cursor:none;padding:0;transition:opacity 0.3s}
+.clear-btn:hover{opacity:0.7}
+
+/* PRODUCTS AREA */
+.products-area{padding:40px 60px}
+.products-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:40px;padding-bottom:24px;border-bottom:1px solid var(--border)}
+.products-count{font-size:0.75rem;color:var(--muted);letter-spacing:0.05em}
+.toolbar-right{display:flex;align-items:center;gap:20px}
+.sort-select{font-family:'Raleway',sans-serif;font-size:0.68rem;letter-spacing:0.1em;border:1px solid var(--border);background:transparent;color:var(--deep);padding:8px 14px;cursor:none;outline:none}
+.view-toggle{display:flex;gap:4px}
+.view-btn{width:34px;height:34px;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:none;transition:all 0.3s;font-size:0.7rem;color:var(--muted)}
+.view-btn.active,.view-btn:hover{background:var(--deep);color:var(--white);border-color:var(--deep)}
+
+.products-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+.products-grid.list-view{grid-template-columns:1fr;gap:16px}
+
+/* PRODUCT CARD */
+.product-card{cursor:none;transition:transform 0.4s ease;animation:fadeUp 0.6s ease both}
+.product-card:hover{transform:translateY(-6px)}
+.product-image-wrap{position:relative;overflow:hidden;aspect-ratio:3/4;background:var(--bone);margin-bottom:18px}
+.product-image-wrap img{width:100%;height:100%;object-fit:cover;transition:transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94);filter:sepia(8%)}
+.product-card:hover .product-image-wrap img{transform:scale(1.06)}
+.product-badges{position:absolute;top:14px;left:14px;display:flex;flex-direction:column;gap:6px}
+.badge{font-size:0.52rem;letter-spacing:0.2em;text-transform:uppercase;padding:4px 10px;font-family:'Raleway',sans-serif}
+.badge-new{background:var(--deep);color:var(--white)}
+.badge-sale{background:var(--terracotta);color:var(--white)}
+.badge-limited{background:var(--gold);color:var(--white)}
+.wishlist-btn{position:absolute;top:14px;right:14px;width:34px;height:34px;border-radius:50%;background:rgba(245,240,232,0.9);border:none;display:flex;align-items:center;justify-content:center;cursor:none;transition:all 0.3s;font-size:0.85rem}
+.wishlist-btn:hover{background:var(--white);transform:scale(1.1)}
+.product-actions{position:absolute;bottom:0;left:0;right:0;background:rgba(26,20,16,0.88);transform:translateY(100%);transition:transform 0.4s ease;display:flex}
+.product-card:hover .product-actions{transform:translateY(0)}
+.product-actions button{flex:1;padding:13px;background:transparent;border:none;color:var(--white);cursor:none;font-family:'Raleway',sans-serif;font-size:0.58rem;letter-spacing:0.18em;text-transform:uppercase;transition:background 0.3s}
+.product-actions button:hover{background:var(--terracotta)}
+.pa-divider{width:1px;background:rgba(255,255,255,0.2)}
+.product-meta{padding:0 2px}
+.product-category{font-size:0.56rem;letter-spacing:0.22em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.product-name{font-family:'Cormorant Garamond',serif;font-size:1.05rem;font-weight:400;margin-bottom:8px;color:var(--deep);line-height:1.3}
+.product-price{font-size:0.82rem;color:var(--warm-brown);letter-spacing:0.05em}
+.product-price del{color:var(--muted);margin-right:6px}
+.product-price strong{color:var(--terracotta)}
+.stars{color:var(--gold);font-size:0.65rem;margin-bottom:6px;letter-spacing:2px}
+
+/* LIST VIEW card */
+.products-grid.list-view .product-card{display:grid;grid-template-columns:200px 1fr;gap:24px}
+.products-grid.list-view .product-image-wrap{aspect-ratio:1;margin-bottom:0}
+.products-grid.list-view .product-meta{display:flex;flex-direction:column;justify-content:center;padding:20px 0}
+.products-grid.list-view .product-name{font-size:1.4rem}
+.products-grid.list-view .product-actions{transform:none;position:static;background:transparent;margin-top:20px}
+.products-grid.list-view .product-actions button{color:var(--deep);border:1px solid var(--border);padding:10px 20px;flex:none}
+.products-grid.list-view .product-actions button:hover{background:var(--deep);color:var(--white);border-color:var(--deep)}
+
+/* PAGINATION */
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;padding:60px 0 20px}
+.page-btn{width:40px;height:40px;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:none;font-family:'Raleway',sans-serif;font-size:0.75rem;color:var(--muted);transition:all 0.3s}
+.page-btn.active,.page-btn:hover{background:var(--deep);color:var(--white);border-color:var(--deep)}
+
+footer{background:var(--deep);color:var(--cream);padding:80px 80px 40px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:60px;margin-bottom:60px}
+.footer-brand .nav-logo{color:var(--cream);margin-bottom:20px;display:block}
+.footer-desc{font-size:0.82rem;line-height:1.8;color:rgba(237,230,214,0.5);max-width:260px;margin-bottom:28px}
+.footer-socials{display:flex;gap:12px}
+.social-btn{width:38px;height:38px;border:1px solid rgba(237,230,214,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:rgba(237,230,214,0.6);font-size:0.75rem;cursor:none;transition:all 0.3s;text-decoration:none}
+.social-btn:hover{border-color:var(--terracotta);color:var(--terracotta)}
+.footer-col h4{font-size:0.62rem;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;font-weight:500}
+.footer-col ul{list-style:none}
+.footer-col ul li{margin-bottom:10px}
+.footer-col ul a{font-size:0.78rem;color:rgba(237,230,214,0.5);text-decoration:none;transition:color 0.3s}
+.footer-col ul a:hover{color:var(--cream)}
+.footer-bottom{border-top:1px solid rgba(237,230,214,0.1);padding-top:28px;display:flex;justify-content:space-between;align-items:center;font-size:0.65rem;color:rgba(237,230,214,0.3)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">Antar<span>mahal</span></a>
+  <ul class="nav-links">
+    <li><a href="shop.html" class="active">Shop</a></li>
+    <li><a href="shop.html">Apparel</a></li>
+    <li><a href="shop.html">Sculptures</a></li>
+    <li><a href="about.html">Our Story</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+  <div class="nav-actions">
+    <a href="#" class="nav-icon">⌕</a>
+    <a href="#" class="nav-icon">♡</a>
+    <a href="cart.html" class="nav-icon">✦<span class="cart-count">2</span></a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="breadcrumb"><a href="index.html">Home</a> › All Collections</div>
+  <h1>The <em>Collection</em></h1>
+  <div class="header-meta">
+    <p>104 handcrafted pieces — each with a story</p>
+    <div class="header-tags">
+      <button class="tag active">All</button>
+      <button class="tag">Apparel</button>
+      <button class="tag">Sculptures</button>
+      <button class="tag">Accessories</button>
+      <button class="tag">Sale</button>
+    </div>
+  </div>
+</div>
+
+<div class="shop-wrap">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="filter-group">
+      <span class="filter-label">Categories</span>
+      <div class="filter-options">
+        <label class="filter-option"><input type="checkbox" checked><span>All Items (104)</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Handwoven Saris (28)</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Kurtas & Sets (20)</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Dupattas (12)</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Terracotta (18)</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Stone Sculpture (14)</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Metal Art (10)</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Accessories (12)</span></label>
+      </div>
+    </div>
+    <div class="divider-line"></div>
+    <div class="filter-group">
+      <span class="filter-label">Price Range</span>
+      <input type="range" class="price-range" min="500" max="50000" value="25000">
+      <div class="price-vals"><span>₹500</span><span>₹25,000</span></div>
+    </div>
+    <div class="divider-line"></div>
+    <div class="filter-group">
+      <span class="filter-label">Craft Tradition</span>
+      <div class="filter-options">
+        <label class="filter-option"><input type="checkbox"><span>Kantha Embroidery</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Muslin Weaving</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Tarakasi Work</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Bishnupur Terracotta</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Dhokra Metal Cast</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Baluchari Weave</span></label>
+      </div>
+    </div>
+    <div class="divider-line"></div>
+    <div class="filter-group">
+      <span class="filter-label">Availability</span>
+      <div class="filter-options">
+        <label class="filter-option"><input type="checkbox"><span>In Stock</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Made to Order</span></label>
+        <label class="filter-option"><input type="checkbox"><span>Last Few</span></label>
+      </div>
+    </div>
+    <div class="divider-line"></div>
+    <button class="clear-btn">Clear All Filters</button>
+  </aside>
+
+  <!-- PRODUCTS -->
+  <div class="products-area">
+    <div class="products-toolbar">
+      <div class="products-count">Showing <strong>104</strong> pieces</div>
+      <div class="toolbar-right">
+        <select class="sort-select">
+          <option>Sort: Featured</option>
+          <option>Price: Low to High</option>
+          <option>Price: High to Low</option>
+          <option>Newest First</option>
+          <option>Best Selling</option>
+        </select>
+        <div class="view-toggle">
+          <button class="view-btn active" onclick="setView('grid',this)">⊞</button>
+          <button class="view-btn" onclick="setView('list',this)">☰</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="products-grid" id="productsGrid">
+
+      <div class="product-card" style="animation-delay:0.05s">
+        <div class="product-image-wrap">
+          <img src="https://images.unsplash.com/photo-1583391733956-6c78276477e1?w=500&q=80" alt="Kantha Silk Sari">
+          <div class="product-badges"><span class="badge badge-new">New</span></div>
+          <button class="wishlist-btn">♡</button>
+          <div class="product-actions">
+            <button onclick="addToCart()">Add to Cart</button>
+            <div class="pa-divider"></div>
+            <button onclick="location.href='product.html'">View</button>
+          </div>
+        </div>
+        <div class="product-meta">
+          <div class="stars">★★★★★</div>
+          <div class="product-category">Apparel · Kantha</div>
+          <div class="product-name">Kantha Embroidered Silk Sari</div>
+          <div class="product-price">₹12,500</div>
+        </div>
+      </div>
+
+      <div class="product-card" style="animation-delay:0.1s">
+        <div class="product-image-wrap">
+          <img src="https://images.unsplash.com/photo-1559181567-c3190bfbf1a1?w=500&q=80" alt="Terracotta Goddess">
+          <div class="product-badges"><span class="badge badge-sale">Sale</span></div>
+          <button class="wishlist-btn">♡</button>
+          <div class="product-actions">
+            <button onclick="addToCart()">Add to Cart</button>
+            <div class="pa-divider"></div>
+            <button onclick="location.href='product.html'">View</button>
+          </div>
+        </div>
+        <div class="product-meta">
+          <div class="stars">★★★★☆</div>
+          <div class="product-category">Sculpture · Terracotta</div>
+          <div class="product-name">Goddess of Harvest — Bishnupur</div>
+          <div class="product-price"><del>₹8,200</del> <strong>₹6,500</strong></div>
+        </div>
+      </div>
+
+      <div class="product-card" style="animation-delay:0.15s">
+        <div class="product-image-wrap">
+          <img src="https://images.unsplash.com/photo-1551489186-cf8726f514f8?w=500&q=80" alt="Muslin Kurta">
+          <button class="wishlist-btn">♡</button>
+          <div class="product-actions">
+            <button onclick="addToCart()">Add to Cart</button>
+            <div class="pa-divider"></div>
+            <button onclick="location.href='product.html'">View</button>
+          </div>
+        </div>
+        <div class="product-meta">
+          <div class="stars">★★★★★</div>
+          <div class="product-category">Apparel · Muslin</div>
+          <div class="product-name">Dhaka Muslin Pleated Kurta</div>
+          <div class="product-price">₹4,800</div>
+        </div>
+      </div>
+
+      <div class="product-card" style="animation-delay:0.2s">
+        <div class="product-image-wrap">
+          <img src="https://images.unsplash.com/photo-1598974357801-cbca100e65d3?w=500&q=80" alt="Stone Shiva">
+          <div class="product-badges"><span class="badge badge-limited">Limited</span></div>
+          <button class="wishlist-btn">♡</button>
+          <div class="product-actions">
+            <button onclick="addToCart()">Add to Cart</button>
+            <div class="pa-divider"></div>
+            <button onclick="location.href='product.html'">View</button>
+          </div>
+        </div>
+        <div class="product-meta">
+          <div class="stars">★★★★★</div>
+          <div class="product-category">Sculpture · Soapstone</div>
+          <div class="product-name">Dancing Shiva Relief Panel</div>
+          <div class="product-price"><del>₹15,000</del> <strong>₹11,200</strong></div>
+        </div>
+      </div>
+
+      <div class="product-card" style="animation-delay:0.25s">
+        <div class="product-image-wrap">
+          <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500&q=80" alt="Baluchari Sari">
+          <button class="wishlist-btn">♡</button>
+          <div class="product-actions">
+            <button onclick="addToCart()">Add to Cart</button>
+            <div class="pa-divider"></div>
+            <button onclick="location.href='product.html'">View</button>
+          </div>
+        </div>
+        <div class="product-meta">
+          <div class="stars">★★★★★</div>
+          <div class="product-category">Apparel · Baluchari</div>
+          <div class="product-name">Mythological Baluchari Silk</div>
+          <div class="product-price">₹18,500</div>
+        </div>
+      </div>
+
+      <div class="product-card" style="animation-delay:0.3s">
+        <div class="product-image-wrap">
+          <img src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=500&q=80" alt="Dhokra Figurine">
+          <div class="product-badges"><span class="badge badge-new">New</span></div>
+          <button class="wishlist-btn">♡</button>
+          <div class="product-actions">
+            <button onclick="addToCart()">Add to Cart</button>
+            <div class="pa-divider"></div>
+            <button onclick="location.href='product.html'">View</button>
+          </div>
+        </div>
+        <div class="product-meta">
+          <div class="stars">★★★★☆</div>
+          <div class="product-category">Sculpture · Dhokra</div>
+          <div class="product-name">Dhokra Cast Tribal Figurine</div>
+          <div class="product-price">₹5,200</div>
+        </div>
+      </div>
+
+      <div class="product-card" style="animation-delay:0.35s">
+        <div class="product-image-wrap">
+          <img src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=500&q=80" alt="Jamdani Dupatta">
+          <button class="wishlist-btn">♡</button>
+          <div class="product-actions">
+            <button onclick="addToCart()">Add to Cart</button>
+            <div class="pa-divider"></div>
+            <button onclick="location.href='product.html'">View</button>
+          </div>
+        </div>
+        <div class="product-meta">
+          <div class="stars">★★★★★</div>
+          <div class="product-category">Apparel · Jamdani</div>
+          <div class="product-name">Jamdani Floral Dupatta</div>
+          <div class="product-price">₹3,400</div>
+        </div>
+      </div>
+
+      <div class="product-card" style="animation-delay:0.4s">
+        <div class="product-image-wrap">
+          <img src="https://images.unsplash.com/photo-1486308510493-aa64833637bc?w=500&q=80" alt="Brass Deity">
+          <div class="product-badges"><span class="badge badge-limited">Limited</span></div>
+          <button class="wishlist-btn">♡</button>
+          <div class="product-actions">
+            <button onclick="addToCart()">Add to Cart</button>
+            <div class="pa-divider"></div>
+            <button onclick="location.href='product.html'">View</button>
+          </div>
+        </div>
+        <div class="product-meta">
+          <div class="stars">★★★★★</div>
+          <div class="product-category">Sculpture · Panchaloha</div>
+          <div class="product-name">Panchaloha Saraswati Idol</div>
+          <div class="product-price">₹22,000</div>
+        </div>
+      </div>
+
+      <div class="product-card" style="animation-delay:0.45s">
+        <div class="product-image-wrap">
+          <img src="https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=500&q=80" alt="Hand Block Print">
+          <div class="product-badges"><span class="badge badge-new">New</span></div>
+          <button class="wishlist-btn">♡</button>
+          <div class="product-actions">
+            <button onclick="addToCart()">Add to Cart</button>
+            <div class="pa-divider"></div>
+            <button onclick="location.href='product.html'">View</button>
+          </div>
+        </div>
+        <div class="product-meta">
+          <div class="stars">★★★★☆</div>
+          <div class="product-category">Apparel · Block Print</div>
+          <div class="product-name">Hand Block Printed Linen Dress</div>
+          <div class="product-price">₹6,800</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="pagination">
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <span style="color:var(--muted);font-size:0.75rem">...</span>
+      <button class="page-btn">8</button>
+      <button class="page-btn" style="width:auto;padding:0 16px">Next →</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="index.html" class="nav-logo">Antar<span>mahal</span></a>
+      <p class="footer-desc">Curating the finest handcrafted apparel and sculptures from Bengal's living artisan traditions.</p>
+      <div class="footer-socials">
+        <a href="#" class="social-btn">f</a><a href="#" class="social-btn">in</a><a href="#" class="social-btn">ig</a><a href="#" class="social-btn">p</a>
+      </div>
+    </div>
+    <div class="footer-col"><h4>Shop</h4><ul><li><a href="shop.html">All Collections</a></li><li><a href="shop.html">Apparel</a></li><li><a href="shop.html">Sculptures</a></li><li><a href="shop.html">Accessories</a></li></ul></div>
+    <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">Our Story</a></li><li><a href="about.html">Artisans</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    <div class="footer-col"><h4>Support</h4><ul><li><a href="#">Shipping & Returns</a></li><li><a href="#">Size Guide</a></li><li><a href="#">FAQ</a></li></ul></div>
+  </div>
+  <div class="footer-bottom"><span>© 2025 Antarmahal.</span><span>Privacy Policy · Terms of Service</span></div>
+</footer>
+
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.transform=`translate(${mx-5}px,${my-5}px)`});
+(function loop(){rx+=(mx-rx-18)*0.12;ry+=(my-ry-18)*0.12;ring.style.transform=`translate(${rx}px,${ry}px)`;requestAnimationFrame(loop)})();
+document.querySelectorAll('a,button,select,.product-card,.filter-option').forEach(el=>{el.addEventListener('mouseenter',()=>ring.classList.add('hovered'));el.addEventListener('mouseleave',()=>ring.classList.remove('hovered'))});
+
+function setView(v,btn){
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('productsGrid').className='products-grid'+(v==='list'?' list-view':'');
+}
+
+document.querySelectorAll('.tag').forEach(t=>t.addEventListener('click',function(){document.querySelectorAll('.tag').forEach(x=>x.classList.remove('active'));this.classList.add('active')}));
+
+let cartCount=2;
+function addToCart(){cartCount++;const c=document.querySelector('.cart-count');c.textContent=cartCount;c.style.transform='scale(1.4)';setTimeout(()=>c.style.transform='',300)}
+</script>
+</body>
+</html>
